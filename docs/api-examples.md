@@ -98,6 +98,78 @@ curl -X POST https://anything-md.doocs.org/ \
   }'
 ```
 
+## 4. 选择转换器
+
+支持三种转换器：`ai`（默认）、`readability`、`jina`。
+
+### GET 请求指定转换器
+```bash
+# 使用 readability 转换器（本地 HTML 解析）
+curl "https://anything-md.doocs.org/?url=https://example.com&converter=readability"
+
+# 使用 jina 转换器（Jina Reader API）
+curl "https://anything-md.doocs.org/?url=https://example.com&converter=jina"
+
+# 使用默认 ai 转换器（Workers AI）
+curl "https://anything-md.doocs.org/?url=https://example.com&converter=ai"
+```
+
+### POST 请求指定转换器
+```bash
+# readability 转换器 + 直接 HTML 内容
+curl -X POST https://anything-md.doocs.org/ \
+  -H "Content-Type: application/json" \
+  -d '{
+    "html": "<html><body><h1>Hello</h1><p>World</p></body></html>",
+    "converter": "readability"
+  }'
+
+# jina 转换器（必须提供 url）
+curl -X POST https://anything-md.doocs.org/ \
+  -H "Content-Type: application/json" \
+  -d '{
+    "url": "https://example.com",
+    "converter": "jina"
+  }'
+```
+
+### JavaScript 示例
+```javascript
+// 使用 readability 转换器
+const response = await fetch('https://anything-md.doocs.org/', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({
+    url: 'https://example.com',
+    converter: 'readability'
+  })
+});
+
+const data = await response.json();
+console.log(data.markdown);
+```
+
+### Python 示例
+```python
+import requests
+
+# 使用 jina 转换器
+response = requests.post('https://anything-md.doocs.org/', json={
+    'url': 'https://example.com',
+    'converter': 'jina'
+})
+
+print(response.json()['markdown'])
+```
+
+### 转换器说明
+
+| 转换器 | 说明 | 限制 |
+|--------|------|------|
+| `ai` | Workers AI `toMarkdown()`，支持 PDF、图片、Office 等多种格式 | 默认转换器 |
+| `readability` | linkedom + Readability + Turndown，本地解析 | 仅支持 HTML 内容 |
+| `jina` | Jina Reader API，远程服务 | 必须提供 URL，不支持直接内容 |
+
 ## 响应格式
 
 ### JSON 响应（默认）
@@ -127,6 +199,7 @@ This domain is for use in illustrative examples...
 | `content` / `html` | string | 否* | 直接提供的内容（二选一） |
 | `contentType` | string | 否 | 内容类型，默认 `text/html` |
 | `fileName` | string | 否 | 输出文件名，HTML 会自动提取标题 |
+| `converter` | string | 否 | 转换器名称：`ai`（默认）、`readability`、`jina` |
 | `format` | string | 否 | 设置为 `raw` 可直接返回 Markdown 文本 |
 
 *注：`url` 和 `content`/`html` 必须提供其中一个

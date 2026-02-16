@@ -98,6 +98,78 @@ curl -X POST https://anything-md.doocs.org/ \
   }'
 ```
 
+## 4. Choose a Converter
+
+Three converters are supported: `ai` (default), `readability`, and `jina`.
+
+### GET Request with Converter
+```bash
+# Use readability converter (local HTML parsing)
+curl "https://anything-md.doocs.org/?url=https://example.com&converter=readability"
+
+# Use jina converter (Jina Reader API)
+curl "https://anything-md.doocs.org/?url=https://example.com&converter=jina"
+
+# Use default ai converter (Workers AI)
+curl "https://anything-md.doocs.org/?url=https://example.com&converter=ai"
+```
+
+### POST Request with Converter
+```bash
+# readability converter + direct HTML content
+curl -X POST https://anything-md.doocs.org/ \
+  -H "Content-Type: application/json" \
+  -d '{
+    "html": "<html><body><h1>Hello</h1><p>World</p></body></html>",
+    "converter": "readability"
+  }'
+
+# jina converter (url is required)
+curl -X POST https://anything-md.doocs.org/ \
+  -H "Content-Type: application/json" \
+  -d '{
+    "url": "https://example.com",
+    "converter": "jina"
+  }'
+```
+
+### JavaScript Example
+```javascript
+// Using the readability converter
+const response = await fetch('https://anything-md.doocs.org/', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({
+    url: 'https://example.com',
+    converter: 'readability'
+  })
+});
+
+const data = await response.json();
+console.log(data.markdown);
+```
+
+### Python Example
+```python
+import requests
+
+# Using the jina converter
+response = requests.post('https://anything-md.doocs.org/', json={
+    'url': 'https://example.com',
+    'converter': 'jina'
+})
+
+print(response.json()['markdown'])
+```
+
+### Converter Reference
+
+| Converter | Description | Limitations |
+|-----------|-------------|-------------|
+| `ai` | Workers AI `toMarkdown()`, supports PDF, images, Office docs, and more | Default converter |
+| `readability` | linkedom + Readability + Turndown, local parsing | HTML content only |
+| `jina` | Jina Reader API, remote service | Requires a URL, no direct content support |
+
 ## Response Format
 
 ### JSON Response (Default)
@@ -127,6 +199,7 @@ This domain is for use in illustrative examples...
 | `content` / `html` | string | No* | Content to convert directly (use one or the other) |
 | `contentType` | string | No | Content MIME type, defaults to `text/html` |
 | `fileName` | string | No | Output file name; for HTML the title is extracted automatically |
+| `converter` | string | No | Converter name: `ai` (default), `readability`, `jina` |
 | `format` | string | No | Set to `raw` to return plain Markdown text instead of JSON |
 
 *Note: Either `url` or `content`/`html` must be provided.

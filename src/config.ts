@@ -62,3 +62,12 @@ export function fetchMaxAttempts(env: Env): number {
 export function corsOrigin(env: Env): string {
   return env.CORS_ORIGIN || '*';
 }
+
+// ---------------------------------------------------------------------------
+// Jina Reader API
+// ---------------------------------------------------------------------------
+
+/** Jina Reader API key (optional) */
+export function jinaApiKey(env: Env): string {
+  return env.JINA_API_KEY || '';
+}
